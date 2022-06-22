@@ -1,0 +1,30 @@
+body{
+    background-image:url("https://images.unsplash.com/photo-1476897017502-219c9169bd6f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80");
+    background-size: cover;
+    background-attachment: fixed;
+}
+
+.gridRow{
+    background-color: blueviolet;
+    height: 30px;
+    min-width: 50px;
+}
+
+.square{
+    background-color: black;
+    height:10px;
+    width:10px;
+    display: inline-flex;
+    padding: 5px;
+    margin:5px;
+}
+
+.water{
+    background-color: rgba(173, 56, 56, 0.805);
+    height:10px;
+    width:10px;
+    display: inline-flex;
+    padding: 5px;
+    margin:5px;
+
+}
