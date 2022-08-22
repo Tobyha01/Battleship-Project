@@ -1,67 +1,115 @@
 "use strict";
-// Game
-//     players
-//         Scores
-//     Grid
-//         cells 2d arrays
-class Game {
-    constructor(rows, columns, players) {
-        // grid:[] []
-        this.grid = []; //more correct .. an array of string arrays
-        this.grid = [];
-        this.players = [];
-        this.guessesLeft = 10;
-        alert("constructing");
-        // this.score = 0
-        this.makeGrid(rows, columns);
-        this.positionShips(10);
-        // for(let i = 0; i<=rows; i++){
-        //     grid.push([])
-        //     for(let j =0; j<=columns; j++){
-        //         grid[i].push(".")
-        //     }
-        // }
-        // this.grid [0].push([]) 
-        // this.guessesLeft = guessesLeft
-        // this.players = players 
-        // this.score = score
+class Player {
+    constructor(name) {
+        this.name = name;
+        this.grid = []; //more correct .. an array of strings arrays
+        this.gameArea = document.getElementById("gamearea").appendChild(document.createElement("div"));
+        this.gameArea.className = "grid";
+        this.makeGrid(9, 9);
+        this.positionShips(4);
+        this.renderGrid();
     }
-    // score:Scores
     makeGrid(rows, columns) {
         for (let i = 0; i <= rows; i++) {
             this.grid.push([]); //puts in an empty row
             for (let j = 0; j <= columns; j++) {
-                this.grid[i].push("."); //pushes dots into this row array
+                this.grid[i].push("water"); //pushes dots into this row array
             }
-        }
-    }
-    positionShips(shipAmount) {
-        for (let i = 0; i <= shipAmount; i++) {
-            let y = Math.floor(Math.random() * this.grid.length);
-            let x = Math.floor(Math.random() * this.grid[0].length);
-            this.grid[y][x] = "s";
         }
     }
     renderGrid() {
-        // generate html based on values in grid - table -flexgrid
         // genarates a view of the grid to the player
+        this.gameArea.innerHTML = "";
         for (let i = 0; i < this.grid.length; i++) {
-            let row = document.createElement("div");
+            const row = document.createElement("div");
+            let square = document.createElement("div");
+            row.appendChild(square);
+            square.innerHTML = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[i];
+            square.className = "label";
             row.className = "gridRow";
-            document.body.appendChild(row);
+            this.gameArea.appendChild(row);
             for (let j = 0; j < this.grid[i].length; j++) {
-                if (this.grid[i][j] == ".") { //i is rows j are columns
-                    let water = document.createElement("div");
-                    water.className = "water";
-                    row.appendChild(water);
-                }
+                let square = document.createElement("div");
+                let content = this.grid[i][j];
+                if (content == "ship" && this.name.toLowerCase() == "computer") //if computers grid
+                 {
+                    square.className = "water";
+                } //display water not ships 
                 else {
-                    let square = document.createElement("div");
-                    square.className = "square";
-                    row.appendChild(square);
+                    square.className = this.grid[i][j];
                 }
+                row.appendChild(square);
             }
         }
+        const row = document.createElement("div");
+        row.className = "gridRow";
+        this.gameArea.appendChild(row);
+        for (let j = 0; j <= this.grid[0].length; j++) {
+            let square = document.createElement("div");
+            square.className = "numbers";
+            row.appendChild(square);
+            if (j == 0) {
+                square.innerHTML = "";
+            }
+            else {
+                square.innerHTML = j + "";
+            }
+        }
+    }
+    checkGrid(guessesLeft, shipsLeft, guessSquare) {
+        let column = parseInt(guessSquare[1]) - 1;
+        let row = guessSquare.charCodeAt(0) - 65;
+        if (this.grid[row][column] == "ship") {
+            this.grid[row][column] = "hit";
+        }
+        else {
+            this.grid[row][column] = "miss";
+        }
+        this.renderGrid();
+    }
+    positionShips(shipAmount) {
+        //create a separate for loop for vertical and hrizontal position, which takes half the shipamount each    
+        for (let i = 0; i < shipAmount; i++) {
+            let x = 0;
+            let y = 0;
+            for (let attempt = 0; attempt < 100; attempt++) {
+                y = Math.floor(Math.random() * (this.grid.length - 4));
+                x = Math.floor(Math.random() * (this.grid[0].length - 1)); //has to be -4 when laying across instead of down 
+                let laid = 0;
+                for (let j = 0; j < 5; j++) {
+                    // if(this.grid[y][x+j] = laid/2) //while column has less than half ship amount, x=, y=, grid y+ half ship amount 
+                    if (this.grid[y + j][x] === "ship") {
+                        break;
+                    }
+                    // if(this.grid[y+j][x] || this.grid[y][x+j] === "ship"){ break }
+                    laid++;
+                }
+                if (laid == shipAmount) {
+                    break;
+                }
+            }
+            for (let j = 0; j < 5; j++) {
+                this.grid[y + j][x] = "ship";
+                // this.grid[y][x+j] = "ship"
+            }
+        }
+    }
+}
+class Game {
+    // guessSquare:string 
+    // score:Scores
+    constructor(playerNames, guessesLeft, guessSquare) {
+        this.players = [];
+        this.gameArea = document.getElementById("gameArea");
+        this.players = [];
+        for (let i = 0; i < playerNames.length; i++) {
+            this.players.push(new Player(playerNames[i]));
+        }
+        this.guessesLeft = 10;
+        // this.score = 0
+        // this.guessSquare       
+        this.guessesLeft = guessesLeft;
+        // this.score = score
     }
 }
 class Scores {
@@ -71,5 +119,12 @@ class Scores {
         this.yourShipsLeft = yourShipsleft;
     }
 }
-const game = new Game(10, 40, ["human", "computer"]);
-game.renderGrid();
+const game = new Game(["human", "computer"], 50, " ");
+function shoot() {
+    //read value from from box
+    game.players[1].checkGrid(0, 0, document.getElementById("shoot").value); //players shot on computers grid
+    let guessRow = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[Math.floor(Math.random() * game.players[0].grid.length)]; //computers shot on player
+    let guessColumn = Math.floor(Math.random() * game.players[0].grid[0].length).toString();
+    game.players[0].checkGrid(0, 0, guessRow + guessColumn); //computer guess will be random everytime
+}
+//# sourceMappingURL=battleship.js.map
