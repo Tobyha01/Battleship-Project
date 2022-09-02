@@ -1,5 +1,5 @@
 class Player{
-
+    
     gameArea:HTMLDivElement 
     grid:string[][] =[] //more correct .. an array of strings arrays
         
